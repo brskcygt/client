@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
+"use client"
+
+import React, { ChangeEvent, FormEvent, useState } from 'react'
 import { v4 } from 'uuid';
+import Header from '../(components)/Header';
 
 type ProductFormData = {
   name: string;
@@ -15,6 +18,7 @@ type CreateProductModalProps = {
 }
 
 const CreateProductModal = ({ isOpen, onClose, onCreate }: CreateProductModalProps) => {
+  console.log({isOpen})
   const [formData, setFormData] = useState({
     productId: v4(),
     name: "",
@@ -23,10 +27,54 @@ const CreateProductModal = ({ isOpen, onClose, onCreate }: CreateProductModalPro
     rating: 0
   })
 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]:
+        name === "price" || name === "stockQuantity" || name === "rating"
+          ? parseFloat(value)
+          : value
+    })
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onCreate(formData);
+    onClose();
+  }
+
   if (!isOpen) return null;
 
+  const labelCssStyles = "block text-sm font-medium text-gray-700"
+  const inputCssStyles = "block w-full mb-2 p-2 border-gray-500 border-2 rounded-md";
+
   return (
-    <div className='flex inset-0 bg-gray-600 bg-opacity-59'>CreateProductModal</div>
+    <div className='fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20'>
+      <div className='relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white'>
+        <Header name='Create New Product'/>
+        <form onSubmit={handleSubmit} className='mt-5'>
+          <label htmlFor='productName' className={labelCssStyles}>Product</label>
+          <input type='text' name='name' placeholder='Name' onChange={handleChange} value={formData.name} className={inputCssStyles} required />
+
+          <label htmlFor='price' className={labelCssStyles}>Price</label>
+          <input type='number' name='price' placeholder='Price' onChange={handleChange} value={formData.price} className={inputCssStyles} required />
+
+          <label htmlFor='stockQuantity' className={labelCssStyles}>Stock Quantity</label>
+          <input type='number' name='stockQuantity' placeholder='Stock Quantity' onChange={handleChange} value={formData.stockQuantity} className={inputCssStyles} required />
+
+          <label htmlFor='rating' className={labelCssStyles}>Rating</label>
+          <input type='number' name='rating' placeholder='Rating' onChange={handleChange} value={formData.rating} className={inputCssStyles} required />
+
+          <button type='submit' className='px-4 py-4 bg-blue-500 text-white rounded hover:bg-blue-700'>
+            Create
+          </button>
+          <button type='button' className='ml-2 px-4 py-4 bg-gray-500 text-white rounded hover:bg-gray-700' onClick={onClose}>
+            Cancel
+          </button>
+        </form>
+      </div>
+    </div>
   )
 }
 
